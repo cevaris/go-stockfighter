@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"encoding/json"
-	"time"
 	"golang.org/x/net/websocket"
 )
 
@@ -15,122 +14,6 @@ Web Sockets: https://astaxie.gitbooks.io/build-web-application-with-golang/conte
 
 type Api struct {
 	config *config
-}
-
-type HeartBeat struct {
-	Ok    bool
-	Error string
-}
-
-type VenueHeartBeat struct {
-	Ok    bool
-	Venue string
-}
-
-type Symbol struct {
-	Name   string
-	Symbol string
-}
-
-type Bid struct {
-	Price int
-	Qty   int
-	IsBuy bool
-}
-
-type Ask struct {
-	Price int
-	Qty   int
-	IsBuy bool
-}
-
-type VenueStocks struct {
-	Ok      bool
-	Symbols []*Symbol
-}
-
-type StockOrderBook struct {
-	Asks   []*Ask
-	Bids   []*Bid
-	Ok     bool
-	Symbol string
-	Ts     time.Time
-	Venue  string
-}
-
-type Fill struct {
-	Price int
-	Qty   int
-	Ts    time.Time
-}
-
-type StockOrderRequest struct {
-	Account   string
-	Direction string
-	OrderType string
-	Price     int
-	Qty       int
-	Stock     string
-	Venue     string
-}
-
-type StockOrder struct {
-	Account     string
-	Direction   string
-	Fills       []*Fill
-	Id          int
-	Ok          bool
-	Open        bool
-	OrderType   string
-	OriginalQty int
-	Price       int
-	Qty         int
-	Symbol      string
-	TotalFilled int
-	Ts          time.Time
-	Venue       string
-}
-
-type StockQuote struct {
-	Ok        bool
-	Symbol    string
-	Venue     string
-	Bid       int
-	Ask       int
-	BidSize   int
-	AskSize   int
-	BidDepth  int
-	AskDepth  int
-	Last      int
-	LastSize  int
-	LastTrade time.Time
-	QuoteTime time.Time
-}
-
-type Execution struct {
-	Ok               bool
-	Account          string
-	Venue            string
-	Symbol           string
-	Order            *StockOrder
-	StandingId       int
-	IncomingId       int
-	Price            int
-	Filled           int
-	FilledAt         time.Time
-	StandingComplete bool
-	IncomingComplete bool
-}
-
-type SStockQuote struct {
-	Ok    bool
-	Quote *StockQuote
-}
-
-type StockOrderAccountStatus struct {
-	Ok     bool
-	Venue  string
-	Orders []*StockOrder
 }
 
 func InitApi(config *config) *Api {
@@ -334,31 +217,31 @@ func (s *Api) Request(method string, path string, body interface{}) ([]byte, err
 	return buffer, nil
 }
 
-func (s *Api) VenueTickerTape(stockQuoteChan chan *SStockQuote, venue string) error {
+func (s *Api) VenueTickerTape(stockQuoteChan chan *StockQuote, venue string) error {
 	urlFormat := "ob/api/ws/%s/venues/%s/tickertape"
 	url := fmt.Sprintf(urlFormat, s.config.Account, venue)
 	return s.wsStockQuote(stockQuoteChan, url)
 }
 
-func (s *Api) StockTickerTape(stockQuoteChan chan *SStockQuote, venue string, stock string) error {
+func (s *Api) StockTickerTape(stockQuoteChan chan *StockQuote, venue string, stock string) error {
 	urlFormat := "ob/api/ws/%s/venues/%s/tickertape/stocks/%s"
 	url := fmt.Sprintf(urlFormat, s.config.Account, venue, stock)
 	return s.wsStockQuote(stockQuoteChan, url)
 }
 
-func (s *Api) wsStockQuote(stockQuoteChan chan *SStockQuote, url string) error {
+func (s *Api) wsStockQuote(stockQuoteChan chan *StockQuote, url string) error {
 	conn, err := s.Stream(url)
 	if err != nil {
 		return err
 	}
 	for {
-		var sStockQuote *SStockQuote
+		var sStockQuote *wrappedStockQuote
 		if err := websocket.JSON.Receive(conn, &sStockQuote); err != nil {
 			fmt.Println("message error:", err)
 			continue
 		}
 		fmt.Printf("Received StreamQuote: %#v\n", sStockQuote)
-		stockQuoteChan <- sStockQuote
+		stockQuoteChan <- sStockQuote.Quote
 	}
 	return nil
 }
