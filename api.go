@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	"time"
+	"golang.org/x/net/websocket"
 )
 
 type Api struct {
@@ -102,6 +103,11 @@ type StockQuote struct {
 	QuoteTime time.Time
 }
 
+type SStockQuote struct {
+	Ok    bool
+	Quote *StockQuote
+}
+
 type StockOrderAccountStatus struct {
 	Ok     bool
 	Venue  string
@@ -137,7 +143,6 @@ func (s *Api) VenueHeartBeat(venue string) (*VenueHeartBeat, error) {
 	}
 
 	var value *VenueHeartBeat
-
 	jsonErr := json.Unmarshal(buffer, &value)
 	if jsonErr == nil {
 		return value, nil
@@ -308,4 +313,16 @@ func (s *Api) Request(method string, path string, body interface{}) ([]byte, err
 		fmt.Println(string(buffer))
 	}
 	return buffer, nil
+}
+
+func (s *Api) TickerTapeStream(venue string) (ws *websocket.Conn, err error) {
+	urlFormat := "ob/api/ws/%s/venues/%s/tickertape"
+	return s.Stream(fmt.Sprintf(urlFormat, s.config.Account, venue))
+}
+
+func (s *Api) Stream(path string) (ws *websocket.Conn, err error) {
+	var origin = "https://api.stockfighter.io/"
+	var url = fmt.Sprintf("wss://api.stockfighter.io/%s", path)
+
+	return websocket.Dial(url, "", origin)
 }
