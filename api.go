@@ -9,6 +9,10 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+/*
+Web Sockets: https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/08.2.html
+*/
+
 type Api struct {
 	config *config
 }
@@ -101,6 +105,21 @@ type StockQuote struct {
 	LastSize  int
 	LastTrade time.Time
 	QuoteTime time.Time
+}
+
+type Execution struct {
+	Ok               bool
+	Account          string
+	Venue            string
+	Symbol           string
+	Order            *StockOrder
+	StandingId       int
+	IncomingId       int
+	Price            int
+	Filled           int
+	FilledAt         time.Time
+	StandingComplete bool
+	IncomingComplete bool
 }
 
 type SStockQuote struct {
@@ -315,14 +334,66 @@ func (s *Api) Request(method string, path string, body interface{}) ([]byte, err
 	return buffer, nil
 }
 
-func (s *Api) TickerTapeStream(venue string) (ws *websocket.Conn, err error) {
+func (s *Api) VenueTickerTape(stockQuoteChan chan *SStockQuote, venue string) error {
 	urlFormat := "ob/api/ws/%s/venues/%s/tickertape"
-	return s.Stream(fmt.Sprintf(urlFormat, s.config.Account, venue))
+	url := fmt.Sprintf(urlFormat, s.config.Account, venue)
+	return s.wsStockQuote(stockQuoteChan, url)
+}
+
+func (s *Api) StockTickerTape(stockQuoteChan chan *SStockQuote, venue string, stock string) error {
+	urlFormat := "ob/api/ws/%s/venues/%s/tickertape/stocks/%s"
+	url := fmt.Sprintf(urlFormat, s.config.Account, venue, stock)
+	return s.wsStockQuote(stockQuoteChan, url)
+}
+
+func (s *Api) wsStockQuote(stockQuoteChan chan *SStockQuote, url string) error {
+	conn, err := s.Stream(url)
+	if err != nil {
+		return err
+	}
+	for {
+		var sStockQuote *SStockQuote
+		if err := websocket.JSON.Receive(conn, &sStockQuote); err != nil {
+			fmt.Println("message error:", err)
+			continue
+		}
+		fmt.Printf("Received StreamQuote: %#v\n", sStockQuote)
+		stockQuoteChan <- sStockQuote
+	}
+	return nil
+}
+
+func (s *Api) VenueExecutions(executionsChan chan *Execution, venue string) error {
+	urlFormat := "ob/api/ws/%s/venues/%s/executions"
+	url := fmt.Sprintf(urlFormat, s.config.Account, venue)
+	return s.wsExecutions(executionsChan, url)
+}
+
+func (s *Api) StockExecutions(executionsChan chan *Execution, venue string, stock string) error {
+	urlFormat := "ob/api/ws/%s/venues/%s/executions/stocks/%s"
+	url := fmt.Sprintf(urlFormat, s.config.Account, venue, stock)
+	return s.wsExecutions(executionsChan, url)
+}
+
+func (s *Api) wsExecutions(executionsChan chan *Execution, url string) error {
+	conn, err := s.Stream(url)
+	if err != nil {
+		return err
+	}
+	for {
+		var execution *Execution
+		if err := websocket.JSON.Receive(conn, &execution); err != nil {
+			fmt.Println("message error:", err)
+			continue
+		}
+		fmt.Printf("Received Execution: %#v\n", execution)
+		executionsChan <- execution
+	}
+	return nil
 }
 
 func (s *Api) Stream(path string) (ws *websocket.Conn, err error) {
 	var origin = "https://api.stockfighter.io/"
 	var url = fmt.Sprintf("wss://api.stockfighter.io/%s", path)
-
 	return websocket.Dial(url, "", origin)
 }

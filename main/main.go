@@ -42,9 +42,9 @@ func main() {
 
 	soReq := &stockfighter.StockOrderRequest{
 		Account: config.Account,
-		Venue: "WLGBEX",
-		Stock: "HDS",
-		Price: 10,
+		Venue: "FOKNEX",
+		Stock: "ACH",
+		Price: 6000,
 		Qty: 2,
 		Direction: "buy",
 		OrderType: "limit",
@@ -56,11 +56,11 @@ func main() {
 		fmt.Println(soResErr)
 	}
 
-	if value, err := api.StockOrderCancel(stockOrder); err == nil {
-		fmt.Printf("stock order cancel request: %#v\n", value)
-	} else {
-		fmt.Println(err)
-	}
+	//if value, err := api.StockOrderCancel(stockOrder); err == nil {
+	//	fmt.Printf("stock order cancel request: %#v\n", value)
+	//} else {
+	//	fmt.Println(err)
+	//}
 
 	if value, err := api.StockOrderStatus(stockOrder); err == nil {
 		fmt.Printf("stock order status: %#v\n", value)
