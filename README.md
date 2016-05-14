@@ -1,0 +1,2 @@
+# stockfighter
+Stock Fighter implementation
