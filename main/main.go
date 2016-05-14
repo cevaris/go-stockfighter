@@ -42,8 +42,8 @@ func main() {
 
 	soReq := &stockfighter.StockOrderRequest{
 		Account: config.Account,
-		Venue: "CEMEX",
-		Stock: "ZICO",
+		Venue: "WLGBEX",
+		Stock: "HDS",
 		Price: 10,
 		Qty: 2,
 		Direction: "buy",

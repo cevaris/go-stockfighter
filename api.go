@@ -115,43 +115,28 @@ func InitApi(config *config) *Api {
 }
 
 func (s *Api) HeartBeat() (*HeartBeat, error) {
-	response, err := s.GetRequest("ob/api/heartbeat")
-
+	buffer, err := s.GetRequest("ob/api/heartbeat")
 	if err != nil {
 		return nil, err
 	}
 
 	var value *HeartBeat
-	buffer, readErr := ioutil.ReadAll(response.Body)
-
-	if readErr != nil {
-		return nil, readErr
-	}
-	fmt.Println(string(buffer))
-
 	jsonErr := json.Unmarshal(buffer, &value)
 
 	if jsonErr == nil {
 		return value, nil
-	} else {
-		return nil, jsonErr
 	}
+
+	return nil, jsonErr
 }
 
 func (s *Api) VenueHeartBeat(venue string) (*VenueHeartBeat, error) {
-	response, err := s.GetRequest(fmt.Sprintf("ob/api/venues/%s/heartbeat", venue))
-
+	buffer, err := s.GetRequest(fmt.Sprintf("ob/api/venues/%s/heartbeat", venue))
 	if err != nil {
 		return nil, err
 	}
 
 	var value *VenueHeartBeat
-
-	buffer, readErr := ioutil.ReadAll(response.Body)
-	if readErr != nil {
-		return nil, readErr
-	}
-	fmt.Println(string(buffer))
 
 	jsonErr := json.Unmarshal(buffer, &value)
 	if jsonErr == nil {
@@ -162,198 +147,140 @@ func (s *Api) VenueHeartBeat(venue string) (*VenueHeartBeat, error) {
 }
 
 func (s *Api) VenueStocks(venue string) (*VenueStocks, error) {
-	response, err := s.GetRequest(fmt.Sprintf("ob/api/venues/%s/stocks", venue))
-
+	buffer, err := s.GetRequest(fmt.Sprintf("ob/api/venues/%s/stocks", venue))
 	if err != nil {
 		return nil, err
-	}
-
-	buffer, readErr := ioutil.ReadAll(response.Body)
-	fmt.Println(string(buffer))
-
-	if readErr != nil {
-		return nil, readErr
 	}
 
 	var value *VenueStocks
-	jsonErr := json.Unmarshal(buffer, &value)
 
+	jsonErr := json.Unmarshal(buffer, &value)
 	if jsonErr == nil {
 		return value, nil
-	} else {
-		return nil, jsonErr
 	}
+
+	return nil, jsonErr
 }
 
 func (s *Api) StockOrderBook(venue string, stock string) (*StockOrderBook, error) {
-	response, err := s.GetRequest(fmt.Sprintf("ob/api/venues/%s/stocks/%s", venue, stock))
+	buffer, err := s.GetRequest(fmt.Sprintf("ob/api/venues/%s/stocks/%s", venue, stock))
 
 	if err != nil {
 		return nil, err
 	}
 
-	buffer, readErr := ioutil.ReadAll(response.Body)
-	fmt.Println(string(buffer))
-
-	if readErr != nil {
-		return nil, readErr
-	}
-
 	var value *StockOrderBook
-	jsonErr := json.Unmarshal(buffer, &value)
 
+	jsonErr := json.Unmarshal(buffer, &value)
 	if jsonErr == nil {
 		return value, nil
-	} else {
-		return nil, jsonErr
 	}
+
+	return nil, jsonErr
 }
 
 func (s *Api) StockOrder(soReq *StockOrderRequest) (*StockOrder, error) {
 	url := fmt.Sprintf(
 		"ob/api/venues/%s/stocks/%s/orders", soReq.Venue, soReq.Stock,
 	)
-	response, err := s.PostRequest(url, soReq)
-
+	buffer, err := s.PostRequest(url, soReq)
 	if err != nil {
 		return nil, err
 	}
 
-	buffer, readErr := ioutil.ReadAll(response.Body)
-	fmt.Println(string(buffer))
-
-	if readErr != nil {
-		return nil, readErr
-	}
-
 	var value *StockOrder
+
 	jsonErr := json.Unmarshal(buffer, &value)
 
 	if jsonErr == nil {
 		return value, nil
-	} else {
-		return nil, jsonErr
 	}
+
+	return nil, jsonErr
 }
 
 func (s *Api) StockOrderCancel(so *StockOrder) (*StockOrder, error) {
 	url := fmt.Sprintf(
 		"ob/api/venues/%s/stocks/%s/orders/%d", so.Venue, so.Symbol, so.Id,
 	)
-	response, err := s.DeleteRequest(url)
-
+	buffer, err := s.DeleteRequest(url)
 	if err != nil {
 		return nil, err
 	}
 
-	buffer, readErr := ioutil.ReadAll(response.Body)
-	fmt.Println(string(buffer))
-
-	if readErr != nil {
-		return nil, readErr
-	}
-
 	var value *StockOrder
-	jsonErr := json.Unmarshal(buffer, &value)
 
+	jsonErr := json.Unmarshal(buffer, &value)
 	if jsonErr == nil {
 		return value, nil
-	} else {
-		return nil, jsonErr
 	}
+
+	return nil, jsonErr
 }
 
 func (s *Api) StockOrdersAccountStatus(so *StockOrder) (*StockOrderAccountStatus, error) {
-	url := fmt.Sprintf(
-		"ob/api/venues/%s/accounts/%s/stocks/%s/orders", so.Venue, so.Account, so.Symbol,
-	)
-	response, err := s.GetRequest(url)
-
+	urlFormat := "ob/api/venues/%s/accounts/%s/stocks/%s/orders"
+	buffer, err := s.GetRequest(fmt.Sprintf(urlFormat, so.Venue, so.Account, so.Symbol))
 	if err != nil {
 		return nil, err
-	}
-
-	buffer, readErr := ioutil.ReadAll(response.Body)
-	fmt.Println(string(buffer))
-
-	if readErr != nil {
-		return nil, readErr
 	}
 
 	var value *StockOrderAccountStatus
-	jsonErr := json.Unmarshal(buffer, &value)
 
+	jsonErr := json.Unmarshal(buffer, &value)
 	if jsonErr == nil {
 		return value, nil
-	} else {
-		return nil, jsonErr
 	}
+
+	return nil, jsonErr
 }
 
 func (s *Api) StockQuote(venue string, stock string) (*StockQuote, error) {
-	response, err := s.GetRequest(fmt.Sprintf("ob/api/venues/%s/stocks/%s/quote", venue, stock))
-
+	buffer, err := s.GetRequest(fmt.Sprintf("ob/api/venues/%s/stocks/%s/quote", venue, stock))
 	if err != nil {
 		return nil, err
-	}
-
-	buffer, readErr := ioutil.ReadAll(response.Body)
-	fmt.Println(string(buffer))
-
-	if readErr != nil {
-		return nil, readErr
 	}
 
 	var value *StockQuote
-	jsonErr := json.Unmarshal(buffer, &value)
 
+	jsonErr := json.Unmarshal(buffer, &value)
 	if jsonErr == nil {
 		return value, nil
-	} else {
-		return nil, jsonErr
 	}
+
+	return nil, jsonErr
 }
 
 func (s *Api) StockOrderStatus(so *StockOrder) (*StockOrder, error) {
-	url := fmt.Sprintf(
-		"ob/api/venues/%s/stocks/%s/orders/%d", so.Venue, so.Symbol, so.Id,
-	)
-	response, err := s.GetRequest(url)
-
+	urlFormat := "ob/api/venues/%s/stocks/%s/orders/%d"
+	buffer, err := s.GetRequest(fmt.Sprintf(urlFormat, so.Venue, so.Symbol, so.Id))
 	if err != nil {
 		return nil, err
 	}
 
-	buffer, readErr := ioutil.ReadAll(response.Body)
-	fmt.Println(string(buffer))
-
-	if readErr != nil {
-		return nil, readErr
-	}
-
 	var value *StockOrder
-	jsonErr := json.Unmarshal(buffer, &value)
 
+	jsonErr := json.Unmarshal(buffer, &value)
 	if jsonErr == nil {
 		return value, nil
-	} else {
-		return nil, jsonErr
 	}
+
+	return nil, jsonErr
 }
 
-func (s *Api) GetRequest(url string) (*goreq.Response, error) {
+func (s *Api) GetRequest(url string) ([]byte, error) {
 	return s.Request("GET", url, nil)
 }
 
-func (s *Api) DeleteRequest(url string) (*goreq.Response, error) {
+func (s *Api) DeleteRequest(url string) ([]byte, error) {
 	return s.Request("DELETE", url, nil)
 }
 
-func (s *Api) PostRequest(url string, body interface{}) (*goreq.Response, error) {
+func (s *Api) PostRequest(url string, body interface{}) ([]byte, error) {
 	return s.Request("POST", url, body)
 }
 
-func (s *Api) Request(method string, path string, body interface{}) (*goreq.Response, error) {
+func (s *Api) Request(method string, path string, body interface{}) ([]byte, error) {
 
 	if body == nil {
 		body = ""
@@ -369,10 +296,16 @@ func (s *Api) Request(method string, path string, body interface{}) (*goreq.Resp
 	}
 	req.AddHeader("X-Starfighter-Authorization", s.config.ApiKey)
 
-	if response, err := req.Do(); err != nil {
-		fmt.Printf("%+v\n", err)
+	response, err := req.Do()
+	if err != nil {
 		return nil, err
-	} else {
-		return response, nil
 	}
+
+	buffer, readErr := ioutil.ReadAll(response.Body)
+	if readErr != nil {
+		return nil, readErr
+	} else {
+		fmt.Println(string(buffer))
+	}
+	return buffer, nil
 }
