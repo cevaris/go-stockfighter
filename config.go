@@ -8,7 +8,8 @@ import (
 )
 
 type config struct {
-	ApiKey string
+	ApiKey  string
+	Account string
 }
 
 func InitConfig(filepath string) *config {
@@ -22,5 +23,6 @@ func InitConfig(filepath string) *config {
 
 	return &config{
 		ApiKey: viper.GetString("api_key"),
+		Account: viper.GetString("trading_account"),
 	}
 }
