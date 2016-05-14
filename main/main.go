@@ -12,4 +12,11 @@ func main() {
 	config := stockfighter.InitConfig(".env.yml")
 
 	fmt.Printf("config: %#v\n", config.ApiKey)
+
+	sfApi := stockfighter.InitApi(config)
+
+	if hb, err := sfApi.HeartBeat(); err == nil {
+		fmt.Printf("request: %#v\n", hb)
+	}
+
 }
