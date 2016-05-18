@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	"golang.org/x/net/websocket"
+	"log"
 )
 
 /*
@@ -13,7 +14,7 @@ Web Sockets: https://astaxie.gitbooks.io/build-web-application-with-golang/conte
 */
 
 type Api struct {
-	Config  *config
+	Config *config
 }
 
 func InitApi(config *config) *Api {
@@ -279,4 +280,20 @@ func (s *Api) Stream(path string) (ws *websocket.Conn, err error) {
 	var origin = "https://api.stockfighter.io/"
 	var url = fmt.Sprintf("wss://api.stockfighter.io/%s", path)
 	return websocket.Dial(url, "", origin)
+}
+
+func (s *Api) IsExchangeHealthy() {
+	if value, err := s.HeartBeat(); err == nil && value.Ok {
+		fmt.Println("Exchange is Healthy")
+	} else {
+		log.Fatalf("Exchange is broken: %s", value.Error)
+	}
+}
+
+func (s *Api) GetBaseQuote(venue string, stock string) *StockQuote {
+	baseQuote, err := s.StockQuote(venue, stock)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return baseQuote
 }
