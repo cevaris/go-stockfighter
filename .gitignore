@@ -1,6 +1,7 @@
-*.test
-.idea
 *.iml
+*.test
 *~
-
+.DS_Store
 .env.*
+.idea
+visuals/data

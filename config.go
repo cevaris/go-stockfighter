@@ -12,7 +12,7 @@ type config struct {
 	Account string
 }
 
-func InitConfig(filepath string) *config {
+func InitConfig(filepath string, account string) *config {
 	viper.SetConfigType("yaml")
 
 	if bs, err := ioutil.ReadFile(filepath); err == nil {
@@ -23,6 +23,6 @@ func InitConfig(filepath string) *config {
 
 	return &config{
 		ApiKey: viper.GetString("api_key"),
-		Account: viper.GetString("trading_account"),
+		Account: account,
 	}
 }

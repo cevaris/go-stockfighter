@@ -13,12 +13,12 @@ Web Sockets: https://astaxie.gitbooks.io/build-web-application-with-golang/conte
 */
 
 type Api struct {
-	config *config
+	Config  *config
 }
 
 func InitApi(config *config) *Api {
 	return &Api{
-		config: config,
+		Config: config,
 	}
 }
 
@@ -201,7 +201,7 @@ func (s *Api) Request(method string, path string, body interface{}) ([]byte, err
 		Uri: fmt.Sprintf("https://api.stockfighter.io/%s", path),
 
 	}
-	req.AddHeader("X-Starfighter-Authorization", s.config.ApiKey)
+	req.AddHeader("X-Starfighter-Authorization", s.Config.ApiKey)
 
 	response, err := req.Do()
 	if err != nil {
@@ -219,13 +219,13 @@ func (s *Api) Request(method string, path string, body interface{}) ([]byte, err
 
 func (s *Api) VenueTickerTape(stockQuoteChan chan *StockQuote, venue string) error {
 	urlFormat := "ob/api/ws/%s/venues/%s/tickertape"
-	url := fmt.Sprintf(urlFormat, s.config.Account, venue)
+	url := fmt.Sprintf(urlFormat, s.Config.Account, venue)
 	return s.wsStockQuote(stockQuoteChan, url)
 }
 
 func (s *Api) StockTickerTape(stockQuoteChan chan *StockQuote, venue string, stock string) error {
 	urlFormat := "ob/api/ws/%s/venues/%s/tickertape/stocks/%s"
-	url := fmt.Sprintf(urlFormat, s.config.Account, venue, stock)
+	url := fmt.Sprintf(urlFormat, s.Config.Account, venue, stock)
 	return s.wsStockQuote(stockQuoteChan, url)
 }
 
@@ -240,7 +240,7 @@ func (s *Api) wsStockQuote(stockQuoteChan chan *StockQuote, url string) error {
 			fmt.Println("message error:", err)
 			continue
 		}
-		fmt.Printf("Received StreamQuote: %#v\n", sStockQuote)
+		//fmt.Printf("Received StreamQuote: %#v\n", sStockQuote)
 		stockQuoteChan <- sStockQuote.Quote
 	}
 	return nil
@@ -248,13 +248,13 @@ func (s *Api) wsStockQuote(stockQuoteChan chan *StockQuote, url string) error {
 
 func (s *Api) VenueExecutions(executionsChan chan *Execution, venue string) error {
 	urlFormat := "ob/api/ws/%s/venues/%s/executions"
-	url := fmt.Sprintf(urlFormat, s.config.Account, venue)
+	url := fmt.Sprintf(urlFormat, s.Config.Account, venue)
 	return s.wsExecutions(executionsChan, url)
 }
 
 func (s *Api) StockExecutions(executionsChan chan *Execution, venue string, stock string) error {
 	urlFormat := "ob/api/ws/%s/venues/%s/executions/stocks/%s"
-	url := fmt.Sprintf(urlFormat, s.config.Account, venue, stock)
+	url := fmt.Sprintf(urlFormat, s.Config.Account, venue, stock)
 	return s.wsExecutions(executionsChan, url)
 }
 
@@ -269,7 +269,7 @@ func (s *Api) wsExecutions(executionsChan chan *Execution, url string) error {
 			fmt.Println("message error:", err)
 			continue
 		}
-		fmt.Printf("Received Execution: %#v\n", execution)
+		//fmt.Printf("Received Execution: %#v\n", execution)
 		executionsChan <- execution
 	}
 	return nil
