@@ -3,7 +3,6 @@ package stockfighter
 import (
 	"sync"
 	"fmt"
-	"container/list"
 )
 
 const (
@@ -12,7 +11,7 @@ const (
 	SignalSell = -1
 )
 
-type MACD struct {
+type Macd struct {
 	FastChan       chan float32
 	fastCurr       float32
 	fastFactor     float32
@@ -24,8 +23,8 @@ type MACD struct {
 	signalBoundary float32
 }
 
-func NewMACD(slow float32, fast float32) *MACD {
-	macd := &MACD{
+func NewMacd(slow float32, fast float32) *Macd {
+	macd := &Macd{
 		FastChan: make(chan float32),
 		fastCurr: 0.0,
 		fastFactor: 1.0 - (1.0 / fast),
@@ -40,11 +39,11 @@ func NewMACD(slow float32, fast float32) *MACD {
 	return macd
 }
 
-func (macd *MACD) Signal() int {
+func (macd *Macd) Signal() int {
 	return macd.signal
 }
 
-func (macd *MACD) calcSignal() int {
+func (macd *Macd) calcSignal() int {
 	fmt.Println("Slow", macd.slowCurr, "Fast", macd.fastCurr)
 
 	if (macd.slowCurr - macd.fastCurr) > macd.signalBoundary {
@@ -56,7 +55,7 @@ func (macd *MACD) calcSignal() int {
 	}
 }
 
-func (macd *MACD)Put(v int) {
+func (macd *Macd)Put(v int) {
 	macd.mutex.Lock()
 	macd.fastCurr = movingAvg(macd.fastFactor, macd.fastCurr, float32(v))
 	macd.slowCurr = movingAvg(macd.slowFactor, macd.slowCurr, float32(v))

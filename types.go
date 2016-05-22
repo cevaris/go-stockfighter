@@ -1,6 +1,10 @@
 package stockfighter
 
-import "time"
+import (
+	"time"
+	"fmt"
+	"encoding/json"
+)
 
 const (
 	DirectionBuy string = "buy"
@@ -126,3 +130,49 @@ type StockOrderAccountStatus struct {
 	Venue  string
 	Orders []*StockOrder
 }
+
+func (o *StockOrderAccountStatus) String() string {
+	j, _ := json.Marshal(o)
+	return fmt.Sprintf("StockOrderAccountStatus(%s)", string(j))
+}
+
+func (o *Execution) String() string {
+	//format := "Execution(Account:%s %s/%s Filled:%d IncomingId:%d StandingId:%d IncomingComplete:%t StandingComplete:%t FilledAt:%+v %s)"
+	//so := fmt.Sprintf(
+	//	format, e.Account, e.Symbol, e.Venue, e.Filled, e.IncomingId, e.StandingId, e.IncomingComplete, e.StandingComplete, e.FilledAt, e.Order,
+	//)
+	//return so
+	j, _ := json.Marshal(o)
+	return fmt.Sprintf("Execution(%s)", string(j))
+}
+
+func (o *StockOrder) String() string {
+	//var fills = make([]string, len(s.Fills))
+	//for _, f := range s.Fills {
+	//	fills = append(fills, fmt.Sprintf("%s", f.String()))
+	//}
+	//
+	//format := "StockOrder(Id:%d Account:% Direction:%s Type:%s Open:%t Qty:%d/%d Price:%d %s/%s Ts:%+v, Fills:[%s])"
+	//return fmt.Sprintf(
+	//	format, s.Id, s.Account, s.Direction, s.OrderType, s.Qty, s.OriginalQty, s.Price, s.Symbol, s.Venue, s.Ts, strings.Join(fills, ","),
+	//)
+	j, _ := json.Marshal(o)
+	return fmt.Sprintf("StockOrder(%s)", string(j))
+}
+
+func (o *StockQuote) String() string {
+	//format := "StockOrder(%s/%s Bid:%d BidSize:%d BidDepth:%d Ask:%d AskSize:%d AskDepth:%d Last:%d LastSize:%d LastTrade:%+v QuoteTime:%+v)"
+	//return fmt.Sprintf(
+	//	format, s.Symbol, s.Venue, s.Bid, s.BidSize, s.BidDepth, s.Ask, s.AskSize, s.AskDepth, s.Last, s.LastSize, s.LastTrade, s.QuoteTime,
+	//)
+	j, _ := json.Marshal(o)
+	return fmt.Sprintf("StockQuote(%s)", string(j))
+}
+
+func (o *Fill) String() string {
+	//format := "Fill(Price:%d Qty:%d Ts:%+v)"
+	//return fmt.Sprintf(format, f.Price, f.Qty, f.Ts)
+	j, _ := json.Marshal(o)
+	return fmt.Sprintf("Fill(%s)", string(j))
+}
+

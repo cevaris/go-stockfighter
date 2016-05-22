@@ -7,11 +7,16 @@ import (
 	"encoding/json"
 	"golang.org/x/net/websocket"
 	"log"
+	"io"
 )
 
 /*
 Web Sockets: https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/08.2.html
 */
+
+var (
+	PRINT_JSON_RESPONSE = false
+)
 
 type Api struct {
 	Config *config
@@ -126,9 +131,9 @@ func (s *Api) StockOrderCancel(so *StockOrder) (*StockOrder, error) {
 	return nil, jsonErr
 }
 
-func (s *Api) StockOrdersAccountStatus(so *StockOrder) (*StockOrderAccountStatus, error) {
+func (s *Api) StockOrdersAccountStatus(venue string, stock string) (*StockOrderAccountStatus, error) {
 	urlFormat := "ob/api/venues/%s/accounts/%s/stocks/%s/orders"
-	buffer, err := s.GetRequest(fmt.Sprintf(urlFormat, so.Venue, so.Account, so.Symbol))
+	buffer, err := s.GetRequest(fmt.Sprintf(urlFormat, venue, s.Config.Account, stock))
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +217,7 @@ func (s *Api) Request(method string, path string, body interface{}) ([]byte, err
 	buffer, readErr := ioutil.ReadAll(response.Body)
 	if readErr != nil {
 		return nil, readErr
-	} else {
+	} else if PRINT_JSON_RESPONSE {
 		fmt.Println(string(buffer))
 	}
 	return buffer, nil
@@ -238,8 +243,12 @@ func (s *Api) wsStockQuote(stockQuoteChan chan *StockQuote, url string) error {
 	for {
 		var sStockQuote *wrappedStockQuote
 		if err := websocket.JSON.Receive(conn, &sStockQuote); err != nil {
-			fmt.Println("message error:", err)
-			continue
+			if err != nil {
+				if err != io.EOF {
+					fmt.Println("message error:", err)
+				}
+				continue
+			}
 		}
 		//fmt.Printf("Received StreamQuote: %#v\n", sStockQuote)
 		stockQuoteChan <- sStockQuote.Quote
@@ -267,8 +276,12 @@ func (s *Api) wsExecutions(executionsChan chan *Execution, url string) error {
 	for {
 		var execution *Execution
 		if err := websocket.JSON.Receive(conn, &execution); err != nil {
-			fmt.Println("message error:", err)
-			continue
+			if err != nil {
+				if err != io.EOF {
+					fmt.Println("message error:", err)
+				}
+				continue
+			}
 		}
 		//fmt.Printf("Received Execution: %#v\n", execution)
 		executionsChan <- execution
