@@ -244,7 +244,10 @@ func (s *Api) wsStockQuote(stockQuoteChan chan *StockQuote, url string) error {
 		var sStockQuote *wrappedStockQuote
 		if err := websocket.JSON.Receive(conn, &sStockQuote); err != nil {
 			if err != nil {
-				if err != io.EOF {
+				if err == io.EOF {
+					break
+				}
+				if err != io.ErrUnexpectedEOF {
 					fmt.Println("message error:", err)
 				}
 				continue
@@ -277,7 +280,10 @@ func (s *Api) wsExecutions(executionsChan chan *Execution, url string) error {
 		var execution *Execution
 		if err := websocket.JSON.Receive(conn, &execution); err != nil {
 			if err != nil {
-				if err != io.EOF {
+				if err == io.EOF {
+					break
+				}
+				if err != io.ErrUnexpectedEOF {
 					fmt.Println("message error:", err)
 				}
 				continue

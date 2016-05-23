@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewMacDWithDefaults(t *testing.T) {
-	macd := NewMACD(5.0, 10.0)
+	macd := NewMacd(5.0, 10.0)
 	actual := macd.Signal()
 	if actual != SignalUnknown {
 		t.Error("bad default signal", actual)
@@ -13,7 +13,7 @@ func TestNewMacDWithDefaults(t *testing.T) {
 }
 
 func TestMacdSameRate(t *testing.T) {
-	macd := NewMACD(5.0, 10.0)
+	macd := NewMacd(5.0, 10.0)
 
 	for _, v := range []int{10, 10, 10} {
 		macd.Put(v)
@@ -26,7 +26,7 @@ func TestMacdSameRate(t *testing.T) {
 }
 
 func TestMacdSameRateWithinBoundary(t *testing.T) {
-	macd := NewMACD(5.0, 10.0)
+	macd := NewMacd(5.0, 10.0)
 
 	for _, v := range []int{11, 12, 11} {
 		macd.Put(v)
@@ -39,7 +39,7 @@ func TestMacdSameRateWithinBoundary(t *testing.T) {
 }
 
 func TestMacdBuy(t *testing.T) {
-	macd := NewMACD(5.0, 10.0)
+	macd := NewMacd(5.0, 10.0)
 
 	for _, v := range []int{34, 36, 37, 41, 40, 39} {
 		macd.Put(v)
@@ -52,7 +52,7 @@ func TestMacdBuy(t *testing.T) {
 }
 
 func TestMacdSell(t *testing.T) {
-	macd := NewMACD(5.0, 10.0)
+	macd := NewMacd(5.0, 10.0)
 
 	for _, v := range []int{30, 15, 10, 5} {
 		macd.Put(v)
