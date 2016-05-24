@@ -34,18 +34,22 @@ func main() {
 
 func positionWorker() {
 	for {
-		currQuote, err := api.StockQuote(Venue, Symbol)
-		if err != nil {
-			fmt.Println(err)
-			continue
+		quote := session.LatestQuote
+		smaTri.Push(quote.Last)
+
+		if smaTri.Signal() == stockfighter.SignalBuy {
+			if quote.Ask > 0 {
+				executeOrder(stockfighter.DirectionBuy, quote.Ask - 100, 50)
+			}
 		}
-		if currQuote.Ask > 0 {
-			executeOrder(stockfighter.DirectionBuy, currQuote.Ask - 400, 50)
+
+		if smaTri.Signal() == stockfighter.SignalBuy {
+			if quote.Bid > 0 {
+				executeOrder(stockfighter.DirectionSell, quote.Bid + 100, 50)
+			}
 		}
-		if currQuote.Bid > 0 {
-			executeOrder(stockfighter.DirectionSell, currQuote.Bid + 400, 50)
-		}
-		time.Sleep(3 * time.Second)
+
+		time.Sleep(1 * time.Second)
 	}
 }
 

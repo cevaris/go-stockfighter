@@ -14,7 +14,7 @@ type Session struct {
 	api         *Api
 	config      *config
 	mutex       *sync.RWMutex
-	latestQuote *StockQuote
+	LatestQuote *StockQuote
 	quoteChan   chan *StockQuote
 	fillChan    chan *Execution
 }
@@ -65,8 +65,8 @@ func (o *Session) Update(status *StockOrderAccountStatus) {
 	}
 
 	o.mutex.Lock()
-	if o.latestQuote != nil && o.latestQuote.Last > 0 {
-		o.NAV = totalCash + (totalPosition * o.latestQuote.Last)
+	if o.LatestQuote != nil && o.LatestQuote.Last > 0 {
+		o.NAV = totalCash + (totalPosition * o.LatestQuote.Last)
 	}
 	o.Cash = totalCash
 	o.Position = totalPosition
@@ -78,7 +78,7 @@ func (o *Session) Observe(symbol string) {
 	go func(c chan *StockQuote) {
 		for q := range c {
 			o.mutex.Lock()
-			o.latestQuote = q
+			o.LatestQuote = q
 			o.mutex.Unlock()
 		}
 	}(o.quoteChan)

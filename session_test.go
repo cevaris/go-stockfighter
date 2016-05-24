@@ -21,7 +21,7 @@ func TestInitSession(t *testing.T) {
 
 func TestSessionUpdate(t *testing.T) {
 	session := InitSession(&config{}, testVenue)
-	session.latestQuote = &StockQuote{Last: 100}
+	session.LatestQuote = &StockQuote{Last: 100}
 	session.Update(&StockOrderAccountStatus{
 		Ok: true,
 		Venue: testVenue,
