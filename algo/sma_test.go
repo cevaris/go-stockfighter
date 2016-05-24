@@ -20,7 +20,7 @@ func TestSimpleMovingAvg_Push(t *testing.T) {
 	for i := 1; i <= testPeriod; i++ {
 		sma.Push(i)
 	}
-	if !reflect.DeepEqual(sma.slice(), []int{5, 4, 3, 2, 1}) {
+	if !reflect.DeepEqual(sma.slice(), []int{1, 2, 3, 4, 5}) {
 		t.Error("bad slice", sma.slice())
 	}
 }
@@ -30,7 +30,7 @@ func TestSimpleMovingAvgPushOverflow(t *testing.T) {
 	for i := 1; i <= 5 * testPeriod; i++ {
 		sma.Push(i)
 	}
-	if !reflect.DeepEqual(sma.slice(), []int{25, 24, 23, 22, 21}) {
+	if !reflect.DeepEqual(sma.slice(), []int{21, 22, 23, 24, 25}) {
 		t.Error("bad slice", sma.slice())
 	}
 	if sma.Value() != 23 {
@@ -50,8 +50,8 @@ func TestSimpleMovingAvg_Value(t *testing.T) {
 
 func TestSimpleMovingAvg_Trend_Positive(t *testing.T) {
 	sma := InitSimpleMovingAvg(testPeriod)
-	for i := 0; i < testPeriod; i++ {
-		sma.Push(i)
+	for _, v := range []int{10, 4, 8, 12, 15} {
+		sma.Push(v)
 	}
 	if sma.Trend() != stockfighter.TrendUp {
 		t.Error("bad trend", sma.Trend())
@@ -60,8 +60,8 @@ func TestSimpleMovingAvg_Trend_Positive(t *testing.T) {
 
 func TestSimpleMovingAvg_Trend_Negative(t *testing.T) {
 	sma := InitSimpleMovingAvg(testPeriod)
-	for i := testPeriod; i >= 1; i-- {
-		sma.Push(i)
+	for _, v := range []int{22, 20, 15, 17, 10} {
+		sma.Push(v)
 	}
 	if sma.Trend() != stockfighter.TrendDown {
 		t.Error("bad trend", sma.Trend())
@@ -100,7 +100,7 @@ func TestSmaTriple_Signal_Sell(t *testing.T) {
 
 func TestSmaTriple_Signal_Unknown(t *testing.T) {
 	sma := InitSmaTriple(1, 2, 3)
-	for _, v := range []int{1, 1, 1, 1} {
+	for _, v := range []int{1, 3, 1, 3} {
 		sma.Push(v)
 	}
 	if sma.Signal() != stockfighter.SignalUnknown {

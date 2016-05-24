@@ -25,9 +25,9 @@ func InitSimpleMovingAvg(period int) *SimpleMovingAvg {
 
 func (o *SimpleMovingAvg) Push(x int) {
 	if o.data.Len() >= o.period {
-		o.data.Remove(o.data.Back())
+		o.data.Remove(o.data.Front())
 	}
-	o.data.PushFront(x)
+	o.data.PushBack(x)
 }
 
 func (o *SimpleMovingAvg) Value() int {
@@ -58,25 +58,36 @@ func (o *SimpleMovingAvg) slice() []int {
 func (o *SimpleMovingAvg) Trend() int {
 	data := o.slice()
 	var leftSum int = 0
-	for _, v := range data[len(data) / 2:] {
+	var leftCount int = 0
+	for _, v := range data[0:len(data) / 2] {
 		leftSum += v
+		leftCount += 1
 	}
 	var rightSum int = 0
-	for _, v := range data[0:len(data) / 2] {
+	var rightCount int = 0
+	for _, v := range data[len(data) / 2:] {
 		rightSum += v
+		rightCount += 1
 	}
-	leftAvg := leftSum / len(data[len(data) / 2:])
-	rightAvg := rightSum / len(data[0:len(data) / 2])
+
+	var leftAvg = 0
+	if leftCount != 0 {
+		leftAvg = leftSum / leftCount
+	}
+
+	var rightAvg = 0
+	if rightCount != 0 {
+		rightAvg = rightSum / rightCount
+	}
 
 	x1, y1 := 0, leftAvg
-	x2, y2 := o.data.Len(), rightAvg
+	x2, y2 := len(data), rightAvg
 
 	trend := float64(y2 - y1) / float64(x2 - x1)
-
-	if trend < 0 {
+	if trend < -0.5 {
 		return stockfighter.TrendDown
 	}
-	if trend > 0 {
+	if trend > 0.5 {
 		return stockfighter.TrendUp
 	}
 	return stockfighter.TrendUnknown
