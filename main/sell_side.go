@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/cevaris/stockfighter"
+	"github.com/cevaris/stockfighter/algo"
 	"time"
 )
 
@@ -16,6 +17,7 @@ var (
 	config = stockfighter.InitConfig(".env.yml", Account)
 	api = stockfighter.InitApi(config)
 	session = stockfighter.InitSession(config, Venue)
+	smaTri = algo.InitSmaTriple(5, 10, 13)
 )
 
 func main() {

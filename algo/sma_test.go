@@ -1,8 +1,9 @@
-package stockfighter
+package algo
 
 import (
 	"testing"
 	"reflect"
+	"github.com/cevaris/stockfighter"
 )
 
 var testPeriod int = 5
@@ -49,20 +50,20 @@ func TestSimpleMovingAvg_Value(t *testing.T) {
 
 func TestSimpleMovingAvg_Trend_Positive(t *testing.T) {
 	sma := InitSimpleMovingAvg(testPeriod)
-	for i := 1; i <= testPeriod; i++ {
+	for i := 0; i < testPeriod; i++ {
 		sma.Push(i)
 	}
-	if sma.Trend() < 0 {
+	if sma.Trend() != stockfighter.TrendUp {
 		t.Error("bad trend", sma.Trend())
 	}
 }
 
 func TestSimpleMovingAvg_Trend_Negative(t *testing.T) {
 	sma := InitSimpleMovingAvg(testPeriod)
-	for i := testPeriod; i <=1 ; i-- {
+	for i := testPeriod; i >= 1; i-- {
 		sma.Push(i)
 	}
-	if sma.Trend() > 0 {
+	if sma.Trend() != stockfighter.TrendDown {
 		t.Error("bad trend", sma.Trend())
 	}
 }
@@ -71,5 +72,38 @@ func TestInitSmaTriple(t *testing.T) {
 	sma := InitSmaTriple(5, 8, 13)
 	for i := 1; i <= 2 * testPeriod; i++ {
 		sma.Push(i)
+	}
+}
+
+func TestSmaTriple_Signal_Buy(t *testing.T) {
+	sma := InitSmaTriple(1, 2, 3)
+	for _, v := range []int{1, 2, 4, 8} {
+		sma.Push(v)
+	}
+	if sma.slow.Trend() != stockfighter.TrendUp {
+		t.Error("bad signal", sma.slow.Trend())
+	}
+	if sma.Signal() != stockfighter.SignalBuy {
+		t.Error("bad signal", sma.Signal())
+	}
+}
+
+func TestSmaTriple_Signal_Sell(t *testing.T) {
+	sma := InitSmaTriple(1, 2, 3)
+	for _, v := range []int{5, 7, 5, 5, 1} {
+		sma.Push(v)
+	}
+	if sma.Signal() != stockfighter.SignalSell {
+		t.Error("bad signal", sma.Signal())
+	}
+}
+
+func TestSmaTriple_Signal_Unknown(t *testing.T) {
+	sma := InitSmaTriple(1, 2, 3)
+	for _, v := range []int{1, 1, 1, 1} {
+		sma.Push(v)
+	}
+	if sma.Signal() != stockfighter.SignalUnknown {
+		t.Error("bad signal", sma.Signal())
 	}
 }
