@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	Account = "HB43284293"
-	Venue = "QWJEX"
-	Symbol = "OMM"
+	Account = "LFB15647648"
+	Venue = "SSKBEX"
+	Symbol = "OINX"
 )
 
 var (
@@ -35,17 +35,20 @@ func main() {
 func positionWorker() {
 	for {
 		quote := session.LatestQuote
-		smaTri.Push(quote.Last)
 
-		if smaTri.Signal() == stockfighter.SignalBuy {
-			if quote.Ask > 0 {
-				executeOrder(stockfighter.DirectionBuy, quote.Ask - 100, 50)
+		if quote != nil {
+			smaTri.Push(quote.Last)
+
+			if smaTri.Signal() == stockfighter.SignalBuy && session.Position < 300 {
+				if quote.Ask > 0 {
+					executeOrder(stockfighter.DirectionBuy, quote.Ask - 300, 100)
+				}
 			}
-		}
 
-		if smaTri.Signal() == stockfighter.SignalBuy {
-			if quote.Bid > 0 {
-				executeOrder(stockfighter.DirectionSell, quote.Bid + 100, 50)
+			if smaTri.Signal() == stockfighter.SignalSell && session.Position > -300 {
+				if quote.Bid > 0 {
+					executeOrder(stockfighter.DirectionSell, quote.Bid + 300, 100)
+				}
 			}
 		}
 
