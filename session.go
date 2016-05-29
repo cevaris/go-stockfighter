@@ -7,23 +7,25 @@ import (
 )
 
 type Session struct {
-	Cash        int
-	NAV         int
-	Position    int
-	Venue       string
-	api         *Api
-	config      *config
-	mutex       *sync.RWMutex
-	LatestQuote *StockQuote
-	quoteChan   chan *StockQuote
-	fillChan    chan *Execution
+	Cash          int
+	NAV           int
+	Position      int
+	TotalPosition int
+	Venue         string
+	api           *Api
+	config        *config
+	mutex         *sync.RWMutex
+	LatestQuote   *StockQuote
+	quoteChan     chan *StockQuote
+	fillChan      chan *Execution
 }
 
 func InitSession(config *config, venue string) *Session {
 	return &Session{
-		Cash: 0,
-		Position: 0,
 		NAV: 0,
+		Position: 0,
+		TotalPosition: 0,
+		Cash: 0,
 		Venue: venue,
 		api: InitApi(config),
 		config: config,
@@ -39,8 +41,9 @@ func (o *Session) String() string {
 }
 
 func (o *Session) Update(status *StockOrderAccountStatus) {
-	var totalPosition int = 0
-	var totalCash int = 0
+	var sumPositionSecured int = 0
+	var sumPositionNonSecured int = 0
+	var sumCash int = 0
 
 	if !status.Ok {
 		return
@@ -51,25 +54,33 @@ func (o *Session) Update(status *StockOrderAccountStatus) {
 			continue
 		}
 
+		if so.Direction == DirectionBuy {
+			sumPositionNonSecured -= so.Qty
+		}
+		if so.Direction == DirectionSell {
+			sumPositionNonSecured += so.Qty
+		}
+
 		for _, fill := range so.Fills {
 
 			if so.Direction == DirectionBuy {
-				totalCash -= fill.Price * fill.Qty
-				totalPosition += fill.Qty
+				sumCash -= fill.Price * fill.Qty
+				sumPositionSecured += fill.Qty
 			}
 			if so.Direction == DirectionSell {
-				totalCash += fill.Price * fill.Qty
-				totalPosition -= fill.Qty
+				sumCash += fill.Price * fill.Qty
+				sumPositionSecured -= fill.Qty
 			}
 		}
 	}
 
 	o.mutex.Lock()
 	if o.LatestQuote != nil && o.LatestQuote.Last > 0 {
-		o.NAV = totalCash + (totalPosition * o.LatestQuote.Last)
+		o.NAV = sumCash + (sumPositionSecured * o.LatestQuote.Last)
 	}
-	o.Cash = totalCash
-	o.Position = totalPosition
+	o.Cash = sumCash
+	o.Position = sumPositionSecured
+	o.TotalPosition = sumPositionSecured + sumPositionNonSecured
 	o.mutex.Unlock()
 }
 
